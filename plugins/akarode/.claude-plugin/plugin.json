@@ -1,0 +1,11 @@
+{
+  "name": "akarode",
+  "description": "Skills Adit Karode builds and uses every day.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Adit Karode",
+    "url": "https://github.com/AKarode"
+  },
+  "repository": "https://github.com/AKarode/skills",
+  "license": "MIT"
+}

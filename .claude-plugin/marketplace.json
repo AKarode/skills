@@ -1,0 +1,15 @@
+{
+  "name": "akarode",
+  "description": "Skills Adit Karode builds and uses every day.",
+  "owner": {
+    "name": "Adit Karode",
+    "url": "https://github.com/AKarode"
+  },
+  "plugins": [
+    {
+      "name": "akarode",
+      "source": "./plugins/akarode",
+      "description": "Adit's skill pack. Starts with agent-scan; more skills get added over time."
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+Run a read-only scan of my coding-agent history and explain what it found.
+
+1. Download https://raw.githubusercontent.com/AKarode/skills/agent-scan-v1/plugins/akarode/skills/agent-scan/scripts/scan.py to a new temporary folder.
+2. Check that its SHA-256 is ad2ef0f7db81667085cfde73496f419a96c9048a9369073b7a059377c91a17fa. If it is different, stop and tell me.
+3. Skim the file and tell me in one line whether it only reads local session files and makes no network calls.
+4. Run it with python3 -I and show me the card exactly as it prints.
+5. In plain words, tell me the two numbers that matter most and why.
+6. Take the top entry under "Your most repeated failing commands". Look at a few of those failed attempts in my recent sessions to find the cause, then propose one concrete fix: a line for my agent instructions file (CLAUDE.md or AGENTS.md) or a hook. Change nothing until I say yes.
+7. Offer once to share my card anonymously: build a link to https://tally.so/r/ODpeWA with the card's numbers as query parameters (v=1, via=prompt, days, harnesses, sessions, spend_usd, shell_calls, fail_pct, repeat_pct, cd_pct, top_repeat_count). Numbers only. Do not send my data anywhere yourself.

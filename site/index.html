@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>agent-scan</title>
+<meta name="description" content="A free skill for Claude Code and Codex that shows how often your coding agents repeat their own mistakes, then has your agent find the cause.">
+<meta property="og:title" content="Your coding agents repeat their own mistakes. See how often.">
+<meta property="og:description" content="A free skill for Claude Code and Codex. Reads your session history on your machine and sends nothing.">
+<style>
+  :root {
+    --bg: #fbfaf7; --fg: #1c1b19; --muted: #66625a; --line: #e4e0d8;
+    --panel: #f2efe8; --accent: #b4441e; --accent-fg: #ffffff; --code: #24221f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161513; --fg: #ece9e2; --muted: #a39e94; --line: #2e2c28;
+      --panel: #1f1d1a; --accent: #e0703f; --accent-fg: #161513; --code: #ece9e2;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161513; --fg: #ece9e2; --muted: #a39e94; --line: #2e2c28;
+    --panel: #1f1d1a; --accent: #e0703f; --accent-fg: #161513; --code: #ece9e2;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+         font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 56px 16px 72px; }
+  .tag { font: 600 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--accent); letter-spacing: .02em; }
+  h1 { font-size: clamp(30px, 6vw, 42px); line-height: 1.15; margin: 14px 0 16px; letter-spacing: -.02em; }
+  h2 { font-size: 21px; margin: 48px 0 12px; }
+  p { margin: 0 0 14px; }
+  .lead { font-size: 19px; color: var(--muted); }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 8px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 16px; border-radius: 8px;
+         font: 600 15px/1 inherit; text-decoration: none; cursor: pointer; border: 1px solid var(--line);
+         background: var(--panel); color: var(--fg); }
+  .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .hint { font-size: 14px; color: var(--muted); }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 18px 0; }
+  .stat { border: 1px solid var(--line); border-radius: 10px; padding: 16px; background: var(--panel); }
+  .stat b { display: block; font-size: 30px; line-height: 1.1; margin-bottom: 6px; }
+  .stat span { font-size: 14px; color: var(--muted); }
+  .block { position: relative; margin: 10px 0 16px; }
+  pre { margin: 0; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel);
+        color: var(--code); font: 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace;
+        overflow-x: auto; white-space: pre; }
+  pre.wrap { white-space: pre-wrap; }
+  .copy { position: absolute; top: 8px; right: 8px; padding: 6px 10px; font-size: 13px; }
+  code { font: 14px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--panel); padding: 1px 5px; border-radius: 4px; }
+  ul { padding-left: 20px; margin: 0 0 14px; }
+  li { margin-bottom: 6px; }
+  details { margin: 8px 0 16px; }
+  summary { cursor: pointer; color: var(--muted); }
+  footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <div class="tag">agent-scan</div>
+  <h1>Your coding agents repeat their own mistakes. See how often.</h1>
+  <p class="lead">A free skill for Claude Code and Codex. It reads your session history on your own machine, prints one card, and then your agent finds the cause of its most repeated failure and proposes a fix.</p>
+
+  <div class="actions">
+    <a class="btn primary" id="open-claude" href="#">Open in Claude Code</a>
+    <button class="btn" data-copy="prompt">Copy the prompt</button>
+  </div>
+  <p class="hint">Works in Claude Code, Codex or any agent that can run a shell command. The button opens Claude Code with the prompt typed in; nothing runs until you send it.</p>
+
+  <h2>What it found on my machines</h2>
+  <div class="stats">
+    <div class="stat"><b>63%</b><span>of my agents' failed commands had already failed before, in the last 30 days</span></div>
+    <div class="stat"><b>26,825</b><span>shell commands run by my agents in 30 days, across Claude Code and Codex</span></div>
+    <div class="stat"><b>5 of 7</b><span>failed <code>gh api</code> calls used a flag that doesn't exist. My agent found that on its own.</span></div>
+  </div>
+  <p>The card, as it printed for me:</p>
+  <div class="block">
+<pre>Shell commands your agents ran: 26,825
+  Failed: 354 (1.8%; look-ups such as grep or ls that find nothing are not counted)
+  Failed again after the same command had already failed: 222 (62.7% of failures)
+  Most repeated failures: 43 times in 17 sessions, 19 times in 6 sessions, 11 times in 9 sessions
+
+Fixed habit patterns (list v2):
+  cd chained to another command: 6,805 calls in 61 sessions (25.4% of calls)</pre>
+  </div>
+
+  <h2>Install it as a skill</h2>
+  <p>In Claude Code:</p>
+  <div class="block">
+<pre id="install-claude">/plugin marketplace add AKarode/skills
+/plugin install akarode@akarode</pre>
+    <button class="btn copy" data-copy="install-claude">Copy</button>
+  </div>
+  <p>Then run <code>/akarode:agent-scan</code>. For Codex, Cursor, Gemini CLI and other agents:</p>
+  <div class="block">
+<pre id="install-other">npx skills add AKarode/skills</pre>
+    <button class="btn copy" data-copy="install-other">Copy</button>
+  </div>
+
+  <h2>Or paste one prompt</h2>
+  <p>No install. Your agent downloads the scanner, checks its fingerprint, runs it and explains the card.</p>
+  <details>
+    <summary>Show the prompt</summary>
+    <div class="block">
+<pre class="wrap" id="prompt">Run a read-only scan of my coding-agent history and explain what it found.
+
+1. Download https://raw.githubusercontent.com/AKarode/skills/agent-scan-v1/plugins/akarode/skills/agent-scan/scripts/scan.py to a new temporary folder.
+2. Check that its SHA-256 is ad2ef0f7db81667085cfde73496f419a96c9048a9369073b7a059377c91a17fa. If it is different, stop and tell me.
+3. Skim the file and tell me in one line whether it only reads local session files and makes no network calls.
+4. Run it with python3 -I and show me the card exactly as it prints.
+5. In plain words, tell me the two numbers that matter most and why.
+6. Take the top entry under "Your most repeated failing commands". Look at a few of those failed attempts in my recent sessions to find the cause, then propose one concrete fix: a line for my agent instructions file (CLAUDE.md or AGENTS.md) or a hook. Change nothing until I say yes.
+7. Offer once to share my card anonymously: build a link to https://tally.so/r/ODpeWA with the card's numbers as query parameters (v=1, via=prompt, days, harnesses, sessions, spend_usd, shell_calls, fail_pct, repeat_pct, cd_pct, top_repeat_count). Numbers only. Do not send my data anywhere yourself.</pre>
+      <button class="btn copy" data-copy="prompt">Copy</button>
+    </div>
+  </details>
+
+  <h2>What happens to your data</h2>
+  <ul>
+    <li>The scanner is <a href="https://github.com/AKarode/skills/blob/main/plugins/akarode/skills/agent-scan/scripts/scan.py">one file of standard-library Python</a> you can read first. It reads your session files without changing them and makes no network calls.</li>
+    <li>The card holds counts, dollars and percentages only. The names of your repeated failing commands stay on your screen, for your agent to work from.</li>
+    <li>Sharing is opt-in. At the end your agent offers a link with your card's numbers; nothing is saved unless you open it and submit.</li>
+  </ul>
+
+  <h2>Ran it?</h2>
+  <p>Tell me what you found: <a href="https://tally.so/r/ODpeWA?via=site">share your card</a>. Every question is optional, and you can leave an email for one reminder to scan again in a week, after your fix.</p>
+
+  <footer>Made by Adit Karode. The skill pack lives at <a href="https://github.com/AKarode/skills">github.com/AKarode/skills</a>.</footer>
+</main>
+<script>
+  (function () {
+    var prompt = document.getElementById('prompt').textContent.trim();
+    document.getElementById('open-claude').href = 'claude-cli://open?q=' + encodeURIComponent(prompt);
+    document.querySelectorAll('[data-copy]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var text = document.getElementById(button.getAttribute('data-copy')).textContent.trim();
+        var label = button.textContent;
+        try {
+          navigator.clipboard.writeText(text).then(function () {
+            button.textContent = 'Copied';
+            setTimeout(function () { button.textContent = label; }, 1500);
+          });
+        } catch (e) { button.textContent = 'Select and copy'; }
+      });
+    });
+  })();
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
